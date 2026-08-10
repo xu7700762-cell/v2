@@ -6,18 +6,14 @@ from pathlib import Path
 
 
 REQUIRED_PATH_KEYS = (
-    "asset_root",
     "monifeixing_data_root",
-    "monifeixing_workbook",
     "vrq_data_root",
-    "vrq_ssq_path",
     "city_data_root",
-    "city_record_workbook",
-    "city_ssq_workbook",
-    "city_acq26_scores",
-    "city_source_vrsq_workbook",
     "pretrain_checkpoint",
 )
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_PROTOCOL_ROOT = PROJECT_ROOT / "reproducibility" / "protocols"
 
 
 def native_path(value: str | Path) -> Path:
@@ -41,6 +37,11 @@ def load_config(path: str | Path) -> dict:
         raise ValueError(f"Config is missing required paths: {', '.join(missing)}")
     config["_config_path"] = str(config_path)
     config["paths"] = {key: native_path(value) for key, value in config["paths"].items()}
+    config["protocol_root"] = (
+        native_path(config["protocol_root"])
+        if "protocol_root" in config
+        else DEFAULT_PROTOCOL_ROOT
+    )
     config["output_root"] = native_path(
         config.get("output_root", "outputs/v27_seed2001")
     )

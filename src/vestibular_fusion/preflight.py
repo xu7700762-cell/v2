@@ -156,54 +156,28 @@ def _check_source_tree() -> dict:
 
 def _check_protocol(config: dict) -> dict:
     paths = config["paths"]
-    asset_root = Path(paths["asset_root"])
-    vr_root = asset_root / "vr_ssq_regression"
-    mono = (
-        vr_root
-        / "artifacts_fair_joint_lambda0p3"
-        / "monifeixing"
-        / "lambda0p3"
-        / "seed42"
-        / "full"
-    )
-    mono_outer_path = (
-        vr_root
-        / "artifacts_monifeixing_crossval"
-        / "identity_disjoint_vrq_aligned_a1_init_seed1001_full"
-        / "identity_disjoint_manifest.json"
-    )
-    vrq_path = (
-        vr_root
-        / "artifacts_fair_joint_lambda0p3"
-        / "vrq"
-        / "seed_42"
-        / "main"
-        / "full"
-        / "audit_manifest.json"
-    )
-    city_path = (
-        vr_root
-        / "artifacts_city_a3_lambda_sweep_strict"
-        / "audit"
-        / "audit_manifest.json"
-    )
-    files = [
-        _require(mono / "report.json", "monifeixing split report"),
-        _require(mono / "severity_predictions.csv", "monifeixing severity labels"),
-        _require(mono_outer_path, "monifeixing data manifest"),
-        _require(vrq_path, "VRQ audit manifest"),
-        _require(city_path, "city audit manifest"),
-    ]
-    mono_report = read_json(mono / "report.json")
+    protocol_root = Path(config["protocol_root"])
+    bundle_path = protocol_root / "manifest.json"
+    bundle = read_json(bundle_path)
+    if bundle.get("checkpoint_schema") != "femba_kan_mtl_v27":
+        raise RuntimeError("Bundled protocol checkpoint schema is not v27")
+    if int(bundle.get("training_seed", -1)) != 2001:
+        raise RuntimeError("Bundled protocol training seed is not 2001")
+    files = [_require(bundle_path, "bundled protocol manifest")]
+    for relative, metadata in bundle["protocol_files"].items():
+        path = protocol_root.parent / relative
+        files.append(
+            _require_hash(path, metadata["sha256"], f"bundled protocol {relative}")
+        )
+    mono_root = protocol_root / "monifeixing"
+    mono_report = read_json(mono_root / "report.json")
     _check_fivefold_subject_split(mono_report["identity_audit"], "monifeixing report")
-    mono_outer = read_json(mono_outer_path)
-    vrq_manifest = read_json(vrq_path)
-    city_manifest = read_json(city_path)
+    mono_outer = read_json(mono_root / "data_manifest.json")
+    vrq_manifest = read_json(protocol_root / "vrq" / "audit_manifest.json")
+    city_manifest = read_json(protocol_root / "city" / "audit_manifest.json")
     _check_fivefold_subject_split(vrq_manifest, "VRQ audit manifest")
     _check_fivefold_subject_split(city_manifest["fold_manifest"], "city fold manifest")
-    pretrain_expected = vrq_manifest["run_fingerprint_payload"]["inputs"][
-        "checkpoint_sha256"
-    ]
+    pretrain_expected = bundle["pretrained_femba"]["sha256"]
     files.append(
         _require_hash(
             Path(paths["pretrain_checkpoint"]), pretrain_expected, "pretrained FEMBA checkpoint"
@@ -217,17 +191,11 @@ def _check_protocol(config: dict) -> dict:
                 f"monifeixing data {name}",
             )
         )
-    files.append(_require(Path(paths["monifeixing_workbook"]), "monifeixing questionnaire"))
     vrq_inputs = vrq_manifest["run_fingerprint_payload"]["inputs"]
     for name, expected in vrq_inputs["mat_sha256"].items():
         files.append(
             _require_hash(Path(paths["vrq_data_root"]) / name, expected, f"VRQ data {name}")
         )
-    files.append(
-        _require_hash(
-            Path(paths["vrq_ssq_path"]), vrq_inputs["ssq_workbook_sha256"], "VRQ questionnaire"
-        )
-    )
     for subject, metadata in city_manifest["audit"]["subjects"].items():
         name = Path(metadata["mat_path"]).name
         files.append(
@@ -237,28 +205,8 @@ def _check_protocol(config: dict) -> dict:
                 f"city data {subject}",
             )
         )
-    city_inputs = city_manifest["audit"]["inputs"]
-    files.extend(
-        [
-            _require_hash(
-                Path(paths["city_record_workbook"]),
-                city_inputs["record_workbook"]["sha256"],
-                "city record workbook",
-            ),
-            _require_hash(
-                Path(paths["city_ssq_workbook"]),
-                city_inputs["ssq_workbook"]["sha256"],
-                "city SSQ workbook",
-            ),
-            _require_hash(
-                Path(paths["city_acq26_scores"]),
-                city_inputs["acq26_scores"]["sha256"],
-                "city acq26 scores",
-            ),
-            _require(Path(paths["city_source_vrsq_workbook"]), "city source identity workbook"),
-        ]
-    )
     return {
+        "protocol_root": str(protocol_root),
         "file_count": len(files),
         "summary_sha256": _summary_digest(files),
         "files": files,

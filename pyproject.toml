@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vestibular-fusion"
-version = "1.0.0"
-description = "Frozen FEMBA-KAN multitask model for vestibular state and severity"
+version = "27.0.0"
+description = "VestibularFusion v27 PolynomialKAN reproducibility package"
 requires-python = ">=3.10,<3.11"
 dependencies = [
   "numpy==2.2.6",
