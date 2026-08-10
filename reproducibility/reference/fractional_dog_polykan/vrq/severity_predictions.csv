@@ -1,4 +1,4 @@
-﻿subject_id,reference_session,task_session,num_anchor_windows,num_task_windows,logit,score,threshold,y_pred,y_true,correct,fold_id
+subject_id,reference_session,task_session,num_anchor_windows,num_task_windows,logit,score,threshold,y_pred,y_true,correct,fold_id
 sub3,rest01,task02,4,11,0.8384839296340942,0.6981458067893982,0.5,1,1,1,fold_1
 sub6,rest01,task02,4,11,-0.8837990760803223,0.2923911213874817,0.5,0,0,1,fold_1
 sub9,rest01,task01,4,11,1.9903475046157837,0.8797798752784729,0.5,1,1,1,fold_1

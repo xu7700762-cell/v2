@@ -21,8 +21,8 @@
       "sha256": "2f3d60e5912815f641b22c83867e2b3f166dea7fb444575eab3c493116710574"
     },
     "protocols/monifeixing/severity_labels.csv": {
-      "bytes": 172,
-      "sha256": "6ec302893c884f3bc2da752087b6ff3eee9b66f4b97611efc0916391bc8f8ecd"
+      "bytes": 153,
+      "sha256": "7617ea5633ebf5adaa46b1684e66698600dbcd9b8f27b5854aaaa7fc7410af82"
     },
     "protocols/vrq/audit_manifest.json": {
       "bytes": 20737,

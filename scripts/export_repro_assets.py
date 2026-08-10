@@ -5,7 +5,6 @@ import csv
 import hashlib
 import json
 import re
-import shutil
 from pathlib import Path
 
 
@@ -34,6 +33,21 @@ def write_json(path: Path, payload: dict) -> None:
     with path.open("w", encoding="utf-8", newline="\n") as handle:
         json.dump(payload, handle, ensure_ascii=False, indent=2, sort_keys=True)
         handle.write("\n")
+
+
+def copy_csv(source: Path, target: Path) -> None:
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with source.open("r", encoding="utf-8-sig", newline="") as source_handle:
+        reader = csv.DictReader(source_handle)
+        if reader.fieldnames is None:
+            raise ValueError(f"CSV has no header: {source}")
+        rows = list(reader)
+    with target.open("w", encoding="utf-8", newline="") as target_handle:
+        writer = csv.DictWriter(
+            target_handle, fieldnames=reader.fieldnames, lineterminator="\n"
+        )
+        writer.writeheader()
+        writer.writerows(rows)
 
 
 def sanitized_path(value: str) -> str:
@@ -87,7 +101,9 @@ def export_protocols(args: argparse.Namespace, output_root: Path) -> dict:
     label_path = protocol_root / "monifeixing" / "severity_labels.csv"
     label_path.parent.mkdir(parents=True, exist_ok=True)
     with label_path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=["subject_id", "y_true"])
+        writer = csv.DictWriter(
+            handle, fieldnames=["subject_id", "y_true"], lineterminator="\n"
+        )
         writer.writeheader()
         for subject in sorted(labels, key=lambda value: int(value.removeprefix("sub"))):
             writer.writerow({"subject_id": subject, "y_true": labels[subject]})
@@ -247,8 +263,8 @@ def export_reference_variant(
         target = reference_root / variant / dataset
         write_json(target / "aggregate_report.json", sanitize(report))
         target.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(state_path, target / "state_predictions.csv")
-        shutil.copyfile(severity_path, target / "severity_predictions.csv")
+        copy_csv(state_path, target / "state_predictions.csv")
+        copy_csv(severity_path, target / "severity_predictions.csv")
         datasets[dataset] = {
             "state": metric_triplet(report, "state_metrics"),
             "severity": metric_triplet(report, "severity_metrics"),
