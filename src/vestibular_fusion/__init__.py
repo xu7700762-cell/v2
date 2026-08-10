@@ -1,3 +1,3 @@
-"""Locked VestibularFusion v1 model and reproduction entry points."""
+"""Locked VestibularFusion v27 model and reproduction entry points."""
 
-__version__ = "1.0.0"
+__version__ = "27.0.0"

@@ -54,19 +54,11 @@ def _select_examples(
 
 
 def _load_monifeixing(config: dict) -> TrainingDataset:
-    root = (
-        Path(config["paths"]["asset_root"])
-        / "vr_ssq_regression"
-        / "artifacts_fair_joint_lambda0p3"
-        / "monifeixing"
-        / "lambda0p3"
-        / "seed42"
-        / "full"
-    )
+    root = Path(config["protocol_root"]) / "monifeixing"
     report = read_json(root / "report.json")
     labels = {
         str(row["subject_id"]): int(row["y_true"])
-        for row in read_csv(root / "severity_predictions.csv")
+        for row in read_csv(root / "severity_labels.csv")
     }
     examples = [
         SeverityExample(subject, "rest1", "rest2", labels[subject])
@@ -91,15 +83,7 @@ def _load_monifeixing(config: dict) -> TrainingDataset:
 
 
 def _load_vrq(config: dict) -> TrainingDataset:
-    root = (
-        Path(config["paths"]["asset_root"])
-        / "vr_ssq_regression"
-        / "artifacts_fair_joint_lambda0p3"
-        / "vrq"
-        / "seed_42"
-        / "main"
-        / "full"
-    )
+    root = Path(config["protocol_root"]) / "vrq"
     manifest = read_json(root / "audit_manifest.json")
     protocols = [vrq.SubjectProtocol(**row) for row in manifest["subject_protocols"]]
     task_sessions = {row.subject_id: row.final_task for row in protocols}
@@ -134,13 +118,7 @@ def _load_vrq(config: dict) -> TrainingDataset:
 
 
 def _load_city(config: dict) -> TrainingDataset:
-    root = (
-        Path(config["paths"]["asset_root"])
-        / "vr_ssq_regression"
-        / "artifacts_city_a3_lambda_sweep_strict"
-        / "audit"
-        / "audit_manifest.json"
-    )
+    root = Path(config["protocol_root"]) / "city" / "audit_manifest.json"
     manifest = read_json(root)
     audit = copy.deepcopy(manifest["audit"])
     aliases = {}
