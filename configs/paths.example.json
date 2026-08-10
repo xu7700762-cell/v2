@@ -1,0 +1,19 @@
+{
+  "output_root": "outputs/v27_seed2001",
+  "training_seed": 2001,
+  "projection_variant": "fractional_dog_polykan",
+  "adaptive_basis_lr": 0.0002,
+  "paths": {
+    "asset_root": "D:/path/to/BioFoundation-main",
+    "monifeixing_data_root": "D:/path/to/preprocessed_monifeixing",
+    "monifeixing_workbook": "D:/path/to/monifeixing_vrsq.xlsx",
+    "vrq_data_root": "D:/path/to/preprocessed_vrq",
+    "vrq_ssq_path": "D:/path/to/vrq_ssq.xlsx",
+    "city_data_root": "D:/path/to/preprocessed_city",
+    "city_record_workbook": "D:/path/to/city_record.xlsx",
+    "city_ssq_workbook": "D:/path/to/city_ssq.xlsx",
+    "city_acq26_scores": "D:/path/to/city_scores.txt",
+    "city_source_vrsq_workbook": "D:/path/to/source_vrsq.xlsx",
+    "pretrain_checkpoint": "D:/path/to/pretrained_femba.ckpt"
+  }
+}
